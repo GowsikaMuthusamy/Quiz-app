@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Death Note Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: url('L.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #0c0202;
+            margin: 5px;
+            padding: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        h1 {
+            text-align: center;
+            color: purple;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .question {
+            margin-bottom: 20px;
+        }
+        .question p {
+            color: black;
+            margin-bottom: 10px;
+            font-family: Sitka Subheading Semibold;
+        }
+        .option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            color: black;
+            font-family: Times New Roman;
+        }
+        input[type="radio"] {
+            margin-right: 10px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #000000;
+            border-radius: 4px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #1b4c48;
+            color: #dfe7ec;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        .correct {
+            color: green;
+            font-weight: bold;
+        }
+        .incorrect {
+            color: red;
+            font-weight: bold;
+        }
+        #timer {
+            margin-top: 20px;
+            font-size: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><b>Death Note Quiz</b></h1>
+        <form id="quizForm"></form>
+        <button id="prevButton" onclick="prevQuestion()" style="display: none;">Previous</button>
+        <button id="nextButton" onclick="nextQuestion()">Next</button>
+        <button id="submitButton" onclick="submitQuiz()" style="display: none;">SUBMIT</button>
+        <div id="timer">Time Left: <span id="time">1:00</span></div>
+    </div>
+
+    <script>
+        let currentQuestionIndex = 0;
+        const questions = [
+            {
+                question: "Who is the main protagonist of Death Note?",
+                options: [
+                    { id: "main1", value: "Light", label: "Light Yagami" },
+                    { id: "main2", value: "L", label: "L" },
+                    { id: "main3", value: "Misa", label: "Misa Amane" }
+                ],
+                correctAnswer: "Light",
+                selectedAnswer: null
+            },
+            {
+                question: "What is the Shinigami's name that gives Light the Death Note?",
+                options: [
+                    { id: "shinigami1", value: "Ryuk", label: "Ryuk" },
+                    { id: "shinigami2", value: "Rem", label: "Rem" },
+                    { id: "shinigami3", value: "Gelus", label: "Gelus" }
+                ],
+                correctAnswer: "Ryuk",
+                selectedAnswer: null
+            },
+            {
+                question: "What is L's real name?",
+                options: [
+                    { id: "realname1", value: "L", label: "L Lawliet" },
+                    { id: "realname2", value: "Near", label: "Near" },
+                    { id: "realname3", value: "Mello", label: "Mello" }
+                ],
+                correctAnswer: "L",
+                selectedAnswer: null
+            },
+            {
+                question: "What is the name of the organization L works with?",
+                options: [
+                    { id: "org3", value: "Task Force", label: "The Task Force" },
+                    { id: "org2", value: "SPK", label: "SPK" },
+                    { id: "org1", value: "Police", label: "The Japanese Police" }
+                ],
+                correctAnswer: "Task Force",
+                selectedAnswer: null
+            },
+            {
+                question: "How does Light initially find out about the Death Note?",
+                options: [
+                    { id: "find1", value: "Book", label: "He finds it on the ground" },
+                    { id: "find2", value: "Internet", label: "He learns about it on the internet" },
+                    { id: "find3", value: "Friend", label: "A friend gives it to him" }
+                ],
+                correctAnswer: "Book",
+                selectedAnswer: null
+            }
+        ];
+
+        const timerElement = document.getElementById('time');
+        let timeLeft = 60;
+        let score = 0;
+
+        renderQuestion();
+
+        function renderQuestion() {
+            const currentQuestion = questions[currentQuestionIndex];
+            const questionContainer = document.getElementById('quizForm');
+            let optionsHtml = '';
+
+            currentQuestion.options.forEach(option => {
+                const isChecked = currentQuestion.selectedAnswer === option.value ? 'checked' : '';
+                optionsHtml += `
+                    <div class="option">
+                        <input type="radio" id="${option.id}" name="answer" value="${option.value}" ${isChecked}>
+                        <label for="${option.id}">${option.label}</label>
+                    </div>
+                `;
+            });
+
+            questionContainer.innerHTML = `
+                <div class="question">
+                    <p>${currentQuestion.question}</p>
+                    ${optionsHtml}
+                </div>
+            `;
+
+            const nextButton = document.getElementById('nextButton');
+            const prevButton = document.getElementById('prevButton');
+            const submitButton = document.getElementById('submitButton');
+            
+            if (currentQuestionIndex === 0) {
+                prevButton.style.display = 'none';
+            } else {
+                prevButton.style.display = 'block';
+            }
+
+            if (currentQuestionIndex < questions.length - 1) {
+                nextButton.style.display = 'block';
+                submitButton.style.display = 'none';
+            } else {
+                nextButton.style.display = 'none';
+                submitButton.style.display = 'block';
+            }
+        }
+
+        function nextQuestion() {
+            const formData = new FormData(document.getElementById('quizForm'));
+            const selectedAnswer = formData.get('answer');
+            questions[currentQuestionIndex].selectedAnswer = selectedAnswer;
+            currentQuestionIndex++;
+            renderQuestion();
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                const formData = new FormData(document.getElementById('quizForm'));
+                const selectedAnswer = formData.get('answer');
+                questions[currentQuestionIndex].selectedAnswer = selectedAnswer;
+                currentQuestionIndex--;
+                renderQuestion();
+            }
+        }
+
+        function checkAnswer(selectedAnswer) {
+            const currentQuestion = questions[currentQuestionIndex];
+            const correctAnswer = currentQuestion.correctAnswer;
+
+            const selectedLabel = document.querySelector(`input[name="answer"]:checked + label`);
+            if (selectedAnswer === correctAnswer) {
+                selectedLabel.classList.add('correct');
+                score++;
+            } else {
+                selectedLabel.classList.add('incorrect');
+                const correctLabel = document.querySelector(`input[name="answer"][value="${correctAnswer}"] + label`);
+                correctLabel.classList.add('correct');
+            }
+        }
+
+        function submitQuiz() {
+            const formData = new FormData(document.getElementById('quizForm'));
+            const selectedAnswer = formData.get('answer');
+            questions[currentQuestionIndex].selectedAnswer = selectedAnswer;
+            
+            score = 0;
+            questions.forEach(question => {
+                if (question.selectedAnswer === question.correctAnswer) {
+                    score++;
+                }
+            });
+
+            alert(`Your score is: ${score}/${questions.length}`);
+            sessionStorage.setItem('quizScore', score);
+            window.location.href = 'quiz4.html';
+        }
+
+        const timer = setInterval(() => {
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                submitQuiz();
+            } else {
+                const minutes = Math.floor(timeLeft / 60);
+                let seconds = timeLeft % 60;
+                seconds = seconds < 10 ? `0${seconds}` : seconds;
+                timerElement.textContent = `${minutes}:${seconds}`;
+                timeLeft--;
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
